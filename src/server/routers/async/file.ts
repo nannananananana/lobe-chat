@@ -5,14 +5,14 @@ import { z } from 'zod';
 
 import { serverDBEnv } from '@/config/db';
 import { fileEnv } from '@/config/file';
-import { DEFAULT_EMBEDDING_MODEL } from '@/const/settings';
+import { DEFAULT_EMBEDDING_MODEL, DEFAULT_AGENT_CONFIG } from '@/const/settings';
 import { NewChunkItem, NewEmbeddingsItem } from '@/database/schemas';
 import { serverDB } from '@/database/server';
 import { ASYNC_TASK_TIMEOUT, AsyncTaskModel } from '@/database/server/models/asyncTask';
 import { ChunkModel } from '@/database/server/models/chunk';
 import { EmbeddingModel } from '@/database/server/models/embedding';
 import { FileModel } from '@/database/server/models/file';
-import { ModelProvider } from '@/libs/agent-runtime';
+// import { ModelProvider } from '@/libs/agent-runtime';
 import { asyncAuthedProcedure, asyncRouter as router } from '@/libs/trpc/async';
 import { initAgentRuntimeWithUserPayload } from '@/server/modules/AgentRuntime';
 import { S3 } from '@/server/modules/S3';
@@ -85,12 +85,17 @@ export const fileRouter = router({
           const chunks = await ctx.chunkModel.getChunksTextByFileId(input.fileId);
           const requestArray = chunk(chunks, CHUNK_SIZE);
 
+          let provider = 'qwen'
+          if (DEFAULT_AGENT_CONFIG.provider) {
+            provider = DEFAULT_AGENT_CONFIG.provider
+          }
+
           try {
             await pMap(
               requestArray,
               async (chunks, index) => {
                 const agentRuntime = await initAgentRuntimeWithUserPayload(
-                  ModelProvider.OpenAI,
+                  provider,
                   ctx.jwtPayload,
                 );
 

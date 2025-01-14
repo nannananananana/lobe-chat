@@ -1,7 +1,7 @@
 import { inArray } from 'drizzle-orm/expressions';
 import { z } from 'zod';
 
-import { DEFAULT_EMBEDDING_MODEL } from '@/const/settings';
+import { DEFAULT_EMBEDDING_MODEL, DEFAULT_AGENT_CONFIG } from '@/const/settings';
 import { knowledgeBaseFiles } from '@/database/schemas';
 import { serverDB } from '@/database/server';
 import { AsyncTaskModel } from '@/database/server/models/asyncTask';
@@ -9,12 +9,17 @@ import { ChunkModel } from '@/database/server/models/chunk';
 import { EmbeddingModel } from '@/database/server/models/embedding';
 import { FileModel } from '@/database/server/models/file';
 import { MessageModel } from '@/database/server/models/message';
-import { ModelProvider } from '@/libs/agent-runtime';
+// import { ModelProvider } from '@/libs/agent-runtime';
 import { authedProcedure, router } from '@/libs/trpc';
 import { keyVaults } from '@/libs/trpc/middleware/keyVaults';
 import { initAgentRuntimeWithUserPayload } from '@/server/modules/AgentRuntime';
 import { ChunkService } from '@/server/services/chunk';
 import { SemanticSearchSchema } from '@/types/rag';
+
+let provider = 'qwen'
+if (DEFAULT_AGENT_CONFIG.provider) {
+  provider = DEFAULT_AGENT_CONFIG.provider
+}
 
 const chunkProcedure = authedProcedure.use(keyVaults).use(async (opts) => {
   const { ctx } = opts;
@@ -108,7 +113,7 @@ export const chunkRouter = router({
     .mutation(async ({ ctx, input }) => {
       console.time('embedding');
       const agentRuntime = await initAgentRuntimeWithUserPayload(
-        ModelProvider.OpenAI,
+        provider,
         ctx.jwtPayload,
       );
 
@@ -137,7 +142,7 @@ export const chunkRouter = router({
       if (!item || !item.embeddings) {
         // TODO: need to support customize
         const agentRuntime = await initAgentRuntimeWithUserPayload(
-          ModelProvider.OpenAI,
+          provider,
           ctx.jwtPayload,
         );
 
