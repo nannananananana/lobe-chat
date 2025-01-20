@@ -8,6 +8,7 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { z } from 'zod';
 
+
 import { fileEnv } from '@/config/file';
 
 export const fileSchema = z.object({
@@ -41,12 +42,15 @@ export class S3 {
       credentials: {
         accessKeyId: fileEnv.S3_ACCESS_KEY_ID,
         secretAccessKey: fileEnv.S3_SECRET_ACCESS_KEY,
-        sessionToken: fileEnv.S3_SESSION_TOKEN,
+        sessionToken: fileEnv.OSS_SESSION_TOKEN,
       },
       endpoint: fileEnv.S3_ENDPOINT,
-      forcePathStyle: fileEnv.S3_ENABLE_PATH_STYLE,
+      // forcePathStyle: false,
+      // forcePathStyle: fileEnv.S3_ENABLE_PATH_STYLE,
       region: fileEnv.S3_REGION || DEFAULT_S3_REGION,
     });
+    console.dir(this.client, { depth: null });
+
   }
 
   public async deleteFile(key: string) {
@@ -103,6 +107,8 @@ export class S3 {
       Bucket: this.bucket,
       Key: key,
     });
+    console.log(await getSignedUrl(this.client, command, { expiresIn: 3600 }))
+    console.dir(this.client, { depth: null });
 
     return getSignedUrl(this.client, command, { expiresIn: 3600 });
   }
@@ -125,7 +131,7 @@ export class S3 {
       Bucket: this.bucket,
       Key: path,
     });
-
+    console.log("command: " + command)
     return this.client.send(command);
   }
 }

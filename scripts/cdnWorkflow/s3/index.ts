@@ -40,6 +40,7 @@ function createS3Client(opts: S3UserConfig): S3Client {
     credentials: {
       accessKeyId: opts.accessKeyId,
       secretAccessKey: opts.secretAccessKey,
+      sessionToken:opts.sessionToken,
     },
 
     endpoint: opts.endpoint || undefined,

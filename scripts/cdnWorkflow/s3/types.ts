@@ -14,6 +14,7 @@ export interface S3UserConfig {
   region: string;
   secretAccessKey: string;
   uploadPath?: string;
+  sessionToken: string;
 }
 
 export interface UploadResult {

@@ -25,6 +25,12 @@ if (!process.env.DOC_S3_PUBLIC_DOMAIN) {
   process.exit(1);
 }
 
+if (!process.env.DOC_OSS_SESSION_TOKEN) {
+  consola.error('请配置 Doc S3 存储的环境变量: DOC_OSS_SESSION_TOKEN');
+  // eslint-disable-next-line unicorn/no-process-exit
+  process.exit(1);
+}
+
 export const BASE_PATH = 'blog/assets';
 
 export const uploader = async (
@@ -42,6 +48,7 @@ export const uploader = async (
 
   const userConfig: S3UserConfig = {
     accessKeyId: process.env.DOC_S3_ACCESS_KEY_ID || '',
+    sessionToken: process.env.DOC_OSS_SESSION_TOKEN || '',
     bucketName: 'hub-apac-1',
     endpoint: 'https://d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com',
     pathPrefix: process.env.DOC_S3_PUBLIC_DOMAIN || '',

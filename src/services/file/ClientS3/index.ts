@@ -21,6 +21,7 @@ export class BrowserS3Storage {
     try {
       const data = await file.arrayBuffer();
       await set(key, { data, name: file.name, type: file.type }, this.store);
+      console.log("=======data=======" + data)
     } catch (e) {
       throw new Error(`Failed to put file ${file.name}: ${(e as Error).message}`);
     }
